@@ -28,23 +28,44 @@ import System.Posix.Files
 import System.Posix.IO
 import System.Posix.Process 
 
-pipeReceiver :: FilePath -> (B.ByteString -> IO a) -> IO a
-pipeReceiver fp receiver = do 
-  pipestr <- iterateUntil (not.B.null) $ threadDelay 10000 >> B.readFile fp 
-  receiver pipestr
+-- | 
+checkPipe :: FilePath -> IO ()
+checkPipe fp = untilM_ (threadDelay 100000) (fileExist fp) 
 
 
+-- | 
 mkTmpFileName :: IO FilePath 
 mkTmpFileName = do
   tdir <- getTemporaryDirectory 
   tuuid <- nextRandom
   return $ tdir </> show tuuid <.> "fifo"
 
+-- | 
 existThenRemove :: FilePath -> IO () 
 existThenRemove fp = fileExist fp >>= \b -> when b (removeLink fp) 
 
-pipeAction :: IO () -> (B.ByteString -> IO ()) -> IO () 
-pipeAction sender receiver = do 
+-- |
+pipeAction :: IO () -> (B.ByteString -> IO a) -> IO a 
+pipeAction sender receiver = pipeActionWith sender (receiver <=< B.readFile)
+
+
+{-  filename <- mkTmpFileName 
+  existThenRemove filename 
+  createNamedPipe filename (unionFileModes ownerReadMode ownerWriteMode)
+  forkProcess $ do  
+    fd <- openFd filename WriteOnly Nothing defaultFileFlags
+    dupTo fd stdOutput 
+    closeFd fd
+    sender 
+    hFlush stdout 
+  r <- receiver =<< B.readFile filename << checkPipe filename 
+  removeLink filename  
+  return r 
+-}
+
+-- |
+pipeActionWith :: IO () -> (FilePath -> IO a) -> IO a 
+pipeActionWith sender receiverf = do 
   filename <- mkTmpFileName 
   existThenRemove filename 
   createNamedPipe filename (unionFileModes ownerReadMode ownerWriteMode)
@@ -54,5 +75,7 @@ pipeAction sender receiver = do
     closeFd fd
     sender 
     hFlush stdout 
-  pipeReceiver filename receiver 
+  r <- checkPipe filename >> receiverf filename  
   removeLink filename  
+  return r 
+
