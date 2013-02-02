@@ -1,0 +1,43 @@
+Name:		hoodle-common
+Version:	0.0.999
+Synopsis:	common utility for hoodle application
+Description: 	common utility for hoodle application
+License: 	BSD3
+License-file:	LICENSE
+Author:		Ian-Woo Kim
+Maintainer: 	Ian-Woo Kim <ianwookim@gmail.com>
+Category:       Hoodle 
+Build-Type: 	Simple
+Cabal-Version:  >= 1.8
+data-files:     CHANGES
+Source-repository head
+  type: git
+  location: https://www.github.com/wavewave/hoodle-common
+
+
+Library
+  hs-source-dirs: src
+  ghc-options: 	-Wall -funbox-strict-fields -fno-warn-unused-do-bind -fno-warn-orphans
+  ghc-prof-options: -caf-all -auto-all
+  Build-Depends: 
+                   base == 4.*, 
+                   bytestring >= 0.9, 
+                   mtl > 2, 
+                   monad-loops >= 0.3,
+                   filepath, 
+                   directory, 
+                   uuid  
+  if os(minw32) 
+    Build-Depends: 
+  else 
+    Build-Depends:   unix 
+  
+
+  Exposed-Modules: 
+                   Hoodle.Util.Process
+
+
+  Other-Modules: 
+
+ 
+		 
