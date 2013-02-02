@@ -30,7 +30,7 @@ import System.Posix.Process
 
 -- | 
 checkPipe :: FilePath -> IO ()
-checkPipe fp = untilM_ (threadDelay 100000) (fileExist fp) 
+checkPipe fp = untilM_ (threadDelay 10000) (fileExist fp) 
 
 
 -- | 
