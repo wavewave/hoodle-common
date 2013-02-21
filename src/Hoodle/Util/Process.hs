@@ -79,3 +79,11 @@ pipeActionWith sender receiverf = do
   removeLink filename  
   return r 
 
+{-
+-- | 
+pipeActionSystem :: String -> (B.ByteString -> IO a) -> IO a 
+pipeActionSystem sendercmd receiver = do 
+  filename <- mkTmpFileName 
+  existThenRemove filename 
+  createNamedPipe filename (unionFileModes ownerReadMode ownerWriteMode)
+-}
